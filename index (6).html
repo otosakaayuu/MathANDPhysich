@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quant Mastery — From Zero to Alpha</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0a0a0f;
+  --ink2:#111118;
+  --ink3:#16161f;
+  --surface:#1c1c28;
+  --surface2:#22222f;
+  --glass:rgba(255,255,255,0.03);
+  --glass2:rgba(255,255,255,0.06);
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.11);
+  --text:#f0f0f8;
+  --muted:#6b6b80;
+  --muted2:#9898b0;
+  --gold:#f5c842;
+  --gold2:#ffd966;
+  --gold-dim:rgba(245,200,66,0.10);
+  --gold-glow:rgba(245,200,66,0.22);
+  --teal:#00d4aa;
+  --teal-dim:rgba(0,212,170,0.10);
+  --violet:#a78bfa;
+  --violet-dim:rgba(167,139,250,0.10);
+  --red:#ff6b6b;
+  --red-dim:rgba(255,107,107,0.10);
+  --font-h:'Syne',sans-serif;
+  --font-b:'Inter',sans-serif;
+  --font-c:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-b);background:var(--ink);color:var(--text);overflow-x:hidden;line-height:1.6}
+
+/* ── CANVAS ── */
+#starfield{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  padding:18px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:rgba(10,10,15,0.7);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:var(--font-h);font-size:16px;font-weight:800;
+  background:linear-gradient(90deg,var(--gold),var(--teal));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-.02em;
+}
+.nav-progress{display:flex;align-items:center;gap:12px}
+.nav-prog-track{width:120px;height:2px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.nav-prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--teal));border-radius:2px;transition:width .5s ease;width:0%}
+.nav-prog-label{font-family:var(--font-c);font-size:11px;color:var(--muted2)}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;padding:120px 24px 80px;
+  position:relative;z-index:1;
+}
+.hero-tag{
+  font-family:var(--font-c);font-size:11px;letter-spacing:.2em;
+  color:var(--gold);text-transform:uppercase;
+  border:1px solid rgba(245,200,66,.25);
+  padding:6px 16px;border-radius:99px;
+  margin-bottom:36px;display:inline-block;
+  opacity:0;animation:riseIn .6s .1s forwards;
+}
+.hero-h1{
+  font-family:var(--font-h);
+  font-size:clamp(52px,9vw,110px);
+  font-weight:800;line-height:.95;
+  letter-spacing:-.04em;
+  margin-bottom:30px;
+  opacity:0;animation:riseIn .7s .25s forwards;
+}
+.hero-h1 em{
+  font-style:normal;
+  display:block;
+  -webkit-text-stroke:1.5px var(--gold);
+  color:transparent;
+  line-height:1;
+}
+.hero-deck{
+  font-size:clamp(16px,2.2vw,20px);
+  color:var(--muted2);max-width:560px;
+  line-height:1.7;margin-bottom:20px;
+  opacity:0;animation:riseIn .7s .4s forwards;
+}
+.hero-deck strong{color:var(--text);font-weight:500}
+.hero-truth{
+  font-family:var(--font-c);font-size:13px;
+  color:var(--teal);margin-bottom:48px;
+  opacity:0;animation:riseIn .6s .55s forwards;
+}
+.hero-cta-row{
+  display:flex;gap:12px;flex-wrap:wrap;justify-content:center;
+  opacity:0;animation:riseIn .6s .7s forwards;
+}
+.btn-cta{
+  padding:14px 32px;border-radius:99px;
+  font-family:var(--font-b);font-size:15px;font-weight:600;
+  cursor:pointer;border:none;transition:all .2s;text-decoration:none;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.btn-cta.primary{
+  background:var(--gold);color:#000;
+  box-shadow:0 0 40px var(--gold-glow);
+}
+.btn-cta.primary:hover{transform:translateY(-2px);box-shadow:0 0 60px var(--gold-glow),0 12px 32px rgba(0,0,0,.5)}
+.btn-cta.ghost{
+  background:var(--glass2);color:var(--muted2);
+  border:1px solid var(--border2);
+}
+.btn-cta.ghost:hover{background:var(--surface);color:var(--text);border-color:rgba(255,255,255,.2)}
+
+.hero-scroll{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  opacity:0;animation:riseIn .5s 1.1s forwards;
+}
+.hero-scroll span{font-family:var(--font-c);font-size:10px;letter-spacing:.18em;color:var(--muted);text-transform:uppercase}
+.scroll-rod{width:1px;height:36px;background:linear-gradient(to bottom,var(--gold),transparent);animation:pulse 2s ease-in-out infinite}
+
+/* ── MANIFESTO ── */
+.manifesto{
+  position:relative;z-index:1;
+  padding:100px 0;
+  background:linear-gradient(180deg,transparent,var(--ink2) 20%,var(--ink2) 80%,transparent);
+}
+.manifesto-inner{max-width:900px;margin:0 auto;padding:0 40px}
+.manifesto-eyebrow{
+  font-family:var(--font-c);font-size:11px;letter-spacing:.2em;
+  color:var(--muted);text-transform:uppercase;margin-bottom:48px;
+  display:flex;align-items:center;gap:16px;
+}
+.manifesto-eyebrow::after{content:'';flex:1;height:1px;background:var(--border)}
+.manifesto-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--border)}
+.m-block{
+  background:var(--ink2);padding:36px 28px;
+  opacity:0;transform:translateY(20px);transition:opacity .6s,transform .6s;
+}
+.m-block.vis{opacity:1;transform:none}
+.m-num{
+  font-family:var(--font-h);font-size:64px;font-weight:800;
+  line-height:1;margin-bottom:12px;
+  -webkit-text-stroke:1px;
+}
+.m-num.gold{color:transparent;-webkit-text-stroke:1.5px var(--gold)}
+.m-num.teal{color:transparent;-webkit-text-stroke:1.5px var(--teal)}
+.m-num.violet{color:transparent;-webkit-text-stroke:1.5px var(--violet)}
+.m-label{font-family:var(--font-h);font-size:18px;font-weight:700;margin-bottom:8px}
+.m-desc{font-size:14px;color:var(--muted2);line-height:1.65}
+
+/* ── SECTIONS ── */
+.section{position:relative;z-index:1;padding:80px 0}
+.section-wrap{max-width:1100px;margin:0 auto;padding:0 40px}
+
+/* ── PHASE HEADER ── */
+.phase-hdr{
+  display:grid;grid-template-columns:auto 1fr;gap:32px;
+  align-items:start;margin-bottom:60px;
+  opacity:0;transform:translateY(16px);transition:opacity .5s,transform .5s;
+}
+.phase-hdr.vis{opacity:1;transform:none}
+.phase-num-big{
+  font-family:var(--font-h);font-size:96px;font-weight:800;
+  line-height:.9;letter-spacing:-.04em;color:transparent;
+  flex-shrink:0;
+}
+.p1 .phase-num-big{-webkit-text-stroke:1.5px var(--gold)}
+.p2 .phase-num-big{-webkit-text-stroke:1.5px var(--teal)}
+.p3 .phase-num-big{-webkit-text-stroke:1.5px var(--violet)}
+.phase-hdr-right{}
+.phase-kicker{
+  font-family:var(--font-c);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;margin-bottom:10px;
+}
+.p1 .phase-kicker{color:var(--gold)}
+.p2 .phase-kicker{color:var(--teal)}
+.p3 .phase-kicker{color:var(--violet)}
+.phase-hdr-title{
+  font-family:var(--font-h);font-size:clamp(28px,4vw,48px);
+  font-weight:800;letter-spacing:-.03em;line-height:1.1;margin-bottom:12px;
+}
+.phase-hdr-sub{font-size:16px;color:var(--muted2);line-height:1.65;max-width:540px}
+.phase-hdr-sub strong{color:var(--text);font-weight:500}
+
+/* ── TOPIC CARDS ── */
+.topics-stack{display:flex;flex-direction:column;gap:2px}
+
+.tcard{
+  background:var(--glass);border:1px solid var(--border);
+  border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:border-color .25s,background .25s;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s,transform .5s,border-color .25s,background .25s;
+}
+.tcard.vis{opacity:1;transform:none}
+.tcard:hover{background:var(--glass2);border-color:var(--border2)}
+.p1 .tcard.open{border-color:rgba(245,200,66,.35);background:rgba(245,200,66,.03)}
+.p2 .tcard.open{border-color:rgba(0,212,170,.35);background:rgba(0,212,170,.03)}
+.p3 .tcard.open{border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.03)}
+
+.tcard-top{
+  display:grid;
+  grid-template-columns:72px 1fr auto;
+  align-items:center;gap:20px;
+  padding:24px 28px;
+}
+.tcard-icon{
+  width:56px;height:56px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;flex-shrink:0;
+  border:1px solid var(--border2);
+  background:var(--surface);
+  transition:transform .2s;
+}
+.tcard:hover .tcard-icon{transform:scale(1.06)}
+.tcard-meta{}
+.tcard-tag{
+  font-family:var(--font-c);font-size:10px;letter-spacing:.15em;
+  padding:3px 9px;border-radius:4px;margin-bottom:8px;display:inline-block;
+  font-weight:500;
+}
+.p1 .tcard-tag{background:var(--gold-dim);color:var(--gold)}
+.p2 .tcard-tag{background:var(--teal-dim);color:var(--teal)}
+.p3 .tcard-tag{background:var(--violet-dim);color:var(--violet)}
+.tcard-title{
+  font-family:var(--font-h);font-size:22px;font-weight:700;
+  letter-spacing:-.02em;line-height:1.2;margin-bottom:4px;
+}
+.tcard-subtitle{font-size:13px;color:var(--muted);font-family:var(--font-c)}
+.tcard-right{
+  display:flex;flex-direction:column;align-items:flex-end;gap:8px;
+  flex-shrink:0;
+}
+.tcard-arrow{
+  font-size:18px;color:var(--muted);
+  transition:transform .3s,color .2s;
+}
+.tcard.open .tcard-arrow{transform:rotate(180deg)}
+.p1 .tcard.open .tcard-arrow{color:var(--gold)}
+.p2 .tcard.open .tcard-arrow{color:var(--teal)}
+.p3 .tcard.open .tcard-arrow{color:var(--violet)}
+.tcard-done-chip{
+  font-family:var(--font-c);font-size:10px;letter-spacing:.1em;
+  padding:3px 10px;border-radius:99px;
+  background:rgba(0,212,170,.1);color:var(--teal);
+  border:1px solid rgba(0,212,170,.25);
+  transform:scale(0);transition:transform .2s;
+}
+.tcard.done .tcard-done-chip{transform:scale(1)}
+
+/* ── DETAIL BODY ── */
+.tcard-body{
+  display:none;
+  border-top:1px solid var(--border);
+}
+.tcard.open .tcard-body{display:block}
+
+.tcard-inner{padding:36px 28px;display:grid;grid-template-columns:1fr 1fr;gap:32px}
+@media(max-width:700px){
+  .tcard-top{grid-template-columns:56px 1fr;gap:14px}
+  .tcard-right{display:none}
+  .tcard-inner{grid-template-columns:1fr}
+  .phase-hdr{grid-template-columns:1fr}
+  .phase-num-big{font-size:56px}
+  .manifesto-grid{grid-template-columns:1fr}
+  nav{padding:14px 20px}
+  .section-wrap{padding:0 20px}
+  .manifesto-inner{padding:0 20px}
+}
+
+.tcard-section-label{
+  font-family:var(--font-c);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:14px;
+  padding-bottom:10px;border-bottom:1px solid var(--border);
+}
+.tcard-body-text{font-size:14px;color:var(--muted2);line-height:1.75}
+.tcard-body-text strong{font-weight:600}
+.tcard-body-text .highlight{
+  display:inline-block;padding:0 4px;border-radius:4px;
+  font-weight:600;font-family:var(--font-c);font-size:13px;
+}
+.p1 .highlight{background:var(--gold-dim);color:var(--gold)}
+.p2 .highlight{background:var(--teal-dim);color:var(--teal)}
+.p3 .highlight{background:var(--violet-dim);color:var(--violet)}
+
+/* ANALOGY BOX */
+.analogy-box{
+  grid-column:1/-1;
+  padding:24px 28px;
+  border-radius:12px;
+  border-left:3px solid;
+  position:relative;overflow:hidden;
+}
+.p1 .analogy-box{background:var(--gold-dim);border-color:var(--gold)}
+.p2 .analogy-box{background:var(--teal-dim);border-color:var(--teal)}
+.p3 .analogy-box{background:var(--violet-dim);border-color:var(--violet)}
+.analogy-label{
+  font-family:var(--font-c);font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:8px;font-weight:500;
+}
+.p1 .analogy-label{color:var(--gold)}
+.p2 .analogy-label{color:var(--teal)}
+.p3 .analogy-label{color:var(--violet)}
+.analogy-text{font-size:15px;line-height:1.7;color:var(--text)}
+
+/* SUBTOPICS */
+.subtopic-grid{display:flex;flex-direction:column;gap:6px}
+.stopic{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 14px;border-radius:8px;background:var(--glass);
+  border:1px solid var(--border);
+  font-size:13px;color:var(--muted2);line-height:1.4;
+  transition:background .15s,color .15s,border-color .15s;
+}
+.stopic:hover{background:var(--glass2);color:var(--text);border-color:var(--border2)}
+.stopic-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:6px}
+.p1 .stopic-dot{background:var(--gold)}
+.p2 .stopic-dot{background:var(--teal)}
+.p3 .stopic-dot{background:var(--violet)}
+
+/* FORMULA CHIP */
+.formula-display{
+  font-family:var(--font-c);font-size:22px;font-weight:500;
+  padding:20px 24px;border-radius:12px;
+  background:var(--surface2);border:1px solid var(--border2);
+  text-align:center;letter-spacing:.04em;
+  margin-bottom:16px;
+}
+.p1 .formula-display{color:var(--gold)}
+.p2 .formula-display{color:var(--teal)}
+.p3 .formula-display{color:var(--violet)}
+
+/* CONNECTIONS */
+.connections-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.cxn-pill{
+  font-size:12px;font-family:var(--font-c);
+  padding:6px 14px;border-radius:99px;
+  border:1px solid var(--border2);color:var(--muted2);
+  background:var(--glass);cursor:pointer;
+  transition:all .15s;
+}
+.cxn-pill:hover{background:var(--surface2);color:var(--text);border-color:rgba(255,255,255,.2)}
+
+/* ACTIONS */
+.tcard-actions{
+  grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px;
+  padding-top:24px;border-top:1px solid var(--border);
+}
+.act-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:10px 20px;border-radius:99px;
+  font-size:13px;font-weight:500;font-family:var(--font-b);
+  cursor:pointer;border:1px solid var(--border2);
+  background:transparent;color:var(--muted2);
+  transition:all .15s;
+}
+.act-btn:hover{background:var(--surface2);color:var(--text);border-color:var(--border2)}
+.act-btn.primary{
+  background:var(--gold);color:#000;border:none;font-weight:600;
+}
+.act-btn.primary:hover{opacity:.9;transform:translateY(-1px)}
+.act-btn.done-state{background:var(--teal-dim);color:var(--teal);border-color:rgba(0,212,170,.3)}
+
+/* ── CONNECTOR ── */
+.phase-gap{
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0 40px;gap:0;
+  position:relative;z-index:1;
+  opacity:0;transition:opacity .6s;
+}
+.phase-gap.vis{opacity:1}
+.pgap-line{width:1px;height:50px;background:linear-gradient(to bottom,var(--border2),transparent)}
+.pgap-badge{
+  border:1px solid var(--border2);background:var(--ink3);
+  padding:8px 20px;border-radius:99px;
+  font-family:var(--font-c);font-size:11px;letter-spacing:.12em;
+  color:var(--muted);
+}
+
+/* ── FOOTER ── */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);
+  padding:60px 40px;text-align:center;
+}
+.footer-title{
+  font-family:var(--font-h);font-size:28px;font-weight:800;
+  letter-spacing:-.02em;margin-bottom:8px;
+}
+.footer-sub{font-size:14px;color:var(--muted2);margin-bottom:32px}
+.footer-meta{font-family:var(--font-c);font-size:11px;color:var(--muted);letter-spacing:.08em}
+
+/* ── ANIMATIONS ── */
+@keyframes riseIn{
+  from{opacity:0;transform:translateY(18px)}
+  to{opacity:1;transform:none}
+}
+@keyframes pulse{
+  0%,100%{opacity:.3}50%{opacity:1}
+}
+@keyframes orbit{
+  from{transform:rotate(0deg) translateX(120px) rotate(0deg)}
+  to{transform:rotate(360deg) translateX(120px) rotate(-360deg)}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">QUANT∙MASTERY</div>
+  <div class="nav-progress">
+    <div class="nav-prog-track"><div class="nav-prog-fill" id="npf"></div></div>
+    <span class="nav-prog-label" id="npl">0/7</span>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-tag">Roadmap · 3 Phase · 7 Core Topics</div>
+  <h1 class="hero-h1">
+    Kuasai<br>
+    <em>Quant.</em>
+  </h1>
+  <p class="hero-deck">
+    Matematika dan fisika yang ada di sini <strong>bukan teori kosong.</strong> Ini adalah senjata yang dipakai oleh hedge fund, quant trader, dan AI engineer terbaik di dunia — dan kamu akan memahami semuanya dari fondasi.
+  </p>
+  <p class="hero-truth">// complexity hilang ketika kamu tahu cara membacanya</p>
+  <div class="hero-cta-row">
+    <a href="#phase1" class="btn-cta primary">Mulai dari sini ↓</a>
+    <a href="#phase3" class="btn-cta ghost">Lihat tujuan akhir</a>
+  </div>
+  <div class="hero-scroll">
+    <span>scroll</span>
+    <div class="scroll-rod"></div>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<div class="manifesto">
+  <div class="manifesto-inner">
+    <div class="manifesto-eyebrow">kenapa ini terasa susah</div>
+    <div class="manifesto-grid">
+      <div class="m-block" data-obs>
+        <div class="m-num gold">01</div>
+        <div class="m-label">Diajarkan terbalik</div>
+        <div class="m-desc">Sekolah mengajarkan rumus sebelum konteks. Kamu hafal persamaan tanpa tahu <em>mengapa</em> ia ada. Di sini, setiap konsep punya cerita terlebih dahulu.</div>
+      </div>
+      <div class="m-block" data-obs>
+        <div class="m-num teal">02</div>
+        <div class="m-label">Tidak ada benang merahnya</div>
+        <div class="m-desc">Linear algebra, kalkulus, entropi — terasa seperti pulau-pulau terpisah. Padahal satu topik adalah kunci untuk membuka topik berikutnya. Roadmap ini menunjukkan benang itu.</div>
+      </div>
+      <div class="m-block" data-obs>
+        <div class="m-num violet">03</div>
+        <div class="m-label">Tidak ada tujuan nyata</div>
+        <div class="m-desc">Sulit semangat belajar kalau tidak tahu akan dipakai untuk apa. Setiap topik di sini terhubung langsung ke kripto, AI, dan membangun sistem yang menghasilkan alpha.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PHASE 1 ═══ -->
+<section class="section p1" id="phase1">
+  <div class="section-wrap">
+    <div class="phase-hdr" data-obs>
+      <div class="phase-num-big">I</div>
+      <div class="phase-hdr-right">
+        <div class="phase-kicker">Phase One · The Quant Foundation</div>
+        <h2 class="phase-hdr-title">Infrastruktur<br>Komputasi</h2>
+        <p class="phase-hdr-sub">Ini adalah <strong>matematika sebagai bahasa</strong> — bukan perhitungan, tapi cara berpikir tentang data, perubahan, dan ketidakpastian. Tanpa tiga fondasi ini, kamu tidak bisa membaca kode ML atau memahami kenapa algoritma trading bekerja.</p>
+      </div>
+    </div>
+    <div class="topics-stack" id="stack-1"></div>
+  </div>
+</section>
+
+<div class="phase-gap" data-obs>
+  <div class="pgap-line"></div>
+  <div class="pgap-badge">matematika → memahami sistem fisik</div>
+  <div class="pgap-line"></div>
+</div>
+
+<!-- ═══ PHASE 2 ═══ -->
+<section class="section p2" id="phase2">
+  <div class="section-wrap">
+    <div class="phase-hdr" data-obs>
+      <div class="phase-num-big">II</div>
+      <div class="phase-hdr-right">
+        <div class="phase-kicker">Phase Two · The System Architecture</div>
+        <h2 class="phase-hdr-title">Fisika<br>Pasar</h2>
+        <p class="phase-hdr-sub">Pasar kripto <strong>berperilaku seperti sistem fisik</strong> — mengikuti hukum entropy, bereaksi nonlinear terhadap trigger kecil. Dua konsep ini mengubah cara kamu melihat volatility dan cascade event selamanya.</p>
+      </div>
+    </div>
+    <div class="topics-stack" id="stack-2"></div>
+  </div>
+</section>
+
+<div class="phase-gap" data-obs>
+  <div class="pgap-line"></div>
+  <div class="pgap-badge">fisika sistem → alpha komersial</div>
+  <div class="pgap-line"></div>
+</div>
+
+<!-- ═══ PHASE 3 ═══ -->
+<section class="section p3" id="phase3">
+  <div class="section-wrap">
+    <div class="phase-hdr" data-obs>
+      <div class="phase-num-big">III</div>
+      <div class="phase-hdr-right">
+        <div class="phase-kicker">Phase Three · Alpha Generation</div>
+        <h2 class="phase-hdr-title">Dari Teori<br>ke Profit</h2>
+        <p class="phase-hdr-sub">Fase terminal. Di sini <strong>seluruh framework dikompilasi</strong> menjadi model dan kode yang berjalan 24/7 — mengeksploitasi inefisiensi pasar yang tidak bisa dilihat dengan mata manusia biasa.</p>
+      </div>
+    </div>
+    <div class="topics-stack" id="stack-3"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-title">Sekarang kamu tahu peta-nya.</div>
+  <div class="footer-sub">Satu langkah kecil setiap hari. Dalam 12 bulan, kamu tidak akan mengenali dirimu sendiri.</div>
+  <div id="footer-prog" class="footer-meta">Progress: 0/7 topik selesai · tersimpan otomatis</div>
+</footer>
+
+<script>
+/* ════════════════════════════════
+   DATA
+════════════════════════════════ */
+const TOPICS = [
+  {
+    id:'linalg', phase:1, emoji:'⬛', tag:'MATEMATIKA',
+    title:'Linear Algebra',
+    subtitle:'Matriks & Vektor',
+    formula:'AX = λX',
+    essence:'Cara kerja data berdimensi tinggi — bahasa dasar semua AI dan trading system.',
+    analogy:'Bayangkan setiap harga kripto di 1.000 exchange selama 30 hari sebagai satu tabel angka raksasa. Linear algebra adalah cara kamu memanipulasi, mengkompresi, dan menemukan pola tersembunyi di dalam tabel itu dalam hitungan milidetik. Tanpa ini, data hanya noise.',
+    body_left:`<p>Linear algebra bukan soal hitung-hitungan biasa. Ini adalah <strong>bahasa untuk memanipulasi data secara masif sekaligus.</strong></p>
+    <br><p>Satu operasi matriks bisa memproses jutaan titik data dalam waktu yang sama. Itulah kenapa GPU — yang didesain untuk perkalian matriks — menjadi tulang punggung semua AI modern.</p>
+    <br><p>Di machine learning, <strong>setiap "layer" di neural network adalah sebuah transformasi matriks.</strong> Weights yang dipelajari model? Angka-angka di dalam matriks. Backpropagation? Perkalian matriks yang dijalankan terbalik.</p>`,
+    body_right:`<p>Di trading, order book sebuah exchange adalah matriks — baris adalah price level, kolom adalah quantity. Analisis spread, depth, dan imbalance adalah operasi linear algebra.</p>
+    <br><p><span class="highlight">Eigenvalue & eigenvector</span> dipakai di PCA untuk mengkompresi ratusan fitur menjadi puluhan tanpa kehilangan informasi penting — teknik standar untuk feature engineering di quant research.</p>
+    <br><p>Kabar baiknya: kamu tidak perlu menghitung ini dengan tangan. NumPy dan PyTorch melakukan semuanya. Tugasmu adalah <strong>mengerti apa yang sedang terjadi,</strong> bukan menjalankan kalkulasi manual.</p>`,
+    subtopics:['Dot product & matrix multiplication','Eigenvalues & eigenvectors — core of PCA','SVD: Singular Value Decomposition','Principal Component Analysis (PCA)','Linear transformations & basis changes','Rank, null space, vector spaces','Matrix decompositions: LU, QR, Cholesky'],
+    prereqs:[],
+    leads_to:['calculus','stochastic'],
+  },
+  {
+    id:'calculus', phase:1, emoji:'📈', tag:'MATEMATIKA',
+    title:'Differential Calculus',
+    subtitle:'Turunan & Rate of Change',
+    formula:'∂L/∂w = ∇',
+    essence:'Mengukur kecepatan perubahan — satu-satunya cara AI "belajar" dan harga bergerak dianalisis.',
+    analogy:'Saat harga BTC naik dari $60k ke $65k dalam 1 jam, kamu tidak hanya peduli pada angkanya — kamu ingin tahu seberapa cepat kenaikan itu terjadi, apakah akselerasinya melambat atau memcepat, dan kapan momen optimalnya. Itulah kalkulus diferensial: ilmu tentang kecepatan dan arah perubahan.',
+    body_left:`<p>Turunan (derivative) adalah jawaban atas satu pertanyaan: <strong>"seberapa cepat sesuatu berubah?"</strong> Itu saja. Tapi pertanyaan itu ternyata adalah pertanyaan paling penting di seluruh dunia quant.</p>
+    <br><p>Di AI, <strong>Gradient Descent</strong> adalah algoritma yang membuat setiap model belajar. Cara kerjanya: hitung turunan dari error, lalu gerakkan parameter ke arah yang menurunkan error. Lakukan ini jutaan kali. Itulah "training" sebuah neural network.</p>
+    <br><p>Tanpa kalkulus diferensial, tidak ada gradient, tidak ada gradient descent, tidak ada deep learning, tidak ada ChatGPT.</p>`,
+    body_right:`<p>Di trading, turunan adalah momentum indicator. RSI, MACD, Bollinger Bands — semua adalah versi yang disederhanakan dari konsep rate-of-change kalkulus.</p>
+    <br><p><span class="highlight">Partial derivatives</span> dipakai ketika ada banyak variabel — misalnya, bagaimana return portofolio berubah ketika BTC naik 1% <em>sambil</em> ETH turun 0.5%? Itu adalah partial derivative.</p>
+    <br><p>Yang terpenting: kalkulus adalah prasyarat untuk memahami Stochastic Calculus di Phase III — yang dipakai semua hedge fund untuk options pricing dan pemodelan volatility aset.</p>`,
+    subtopics:['Limits & continuity — pondasi turunan','Chain rule, product rule, quotient rule','Partial derivatives & gradient vector','Optimization: critical points, minima, maxima','Taylor series — approximasi fungsi kompleks','Multivariable calculus','Gradient Descent & learning rate intuition'],
+    prereqs:['linalg'],
+    leads_to:['probability','stochastic'],
+  },
+  {
+    id:'probability', phase:1, emoji:'🎲', tag:'STATISTIKA',
+    title:'Probability & Bayesian Statistics',
+    subtitle:'Pemodelan Ketidakpastian',
+    formula:"P(A|B) = P(B|A)·P(A)/P(B)",
+    essence:'Cara matematis memisahkan sinyal nyata dari noise pasar — dan mengukur EV sebuah keputusan.',
+    analogy:'Setiap hari kamu membuat keputusan di bawah ketidakpastian: masuk posisi atau tidak? Hold atau cut? Probabilitas dan statistik Bayesian adalah cara mengubah intuisi tersebut menjadi angka yang bisa dibuktikan. Bukan feeling — tapi kalkulasi.',
+    body_left:`<p>Pasar adalah generator noise raksasa. 90% dari pergerakan harga adalah acak. Hanya <strong>10% yang adalah sinyal nyata</strong> — dan tugas kamu adalah menemukannya.</p>
+    <br><p><strong>Bayesian updating</strong> adalah framework untuk melakukannya: mulai dengan keyakinan awal (prior), masukkan data baru (likelihood), update keyakinanmu (posterior). Lakukan terus-menerus. Inilah cara trader terbaik berpikir.</p>
+    <br><p>Expected Value (EV) — konsep paling penting di trading — adalah probabilitas dikali outcome. Sebuah trade dengan win rate 30% bisa tetap positif EV jika profitnya 4x lebih besar dari loss-nya.</p>`,
+    body_right:`<p>Return aset kripto <strong>tidak terdistribusi normal.</strong> Ada "fat tails" — kejadian ekstrem (crash 40% dalam sehari) jauh lebih sering terjadi daripada yang diprediksi kurva bell biasa.</p>
+    <br><p><span class="highlight">Monte Carlo simulation</span> adalah teknik probabilitas untuk mensimulasikan ribuan skenario pasar dan melihat distribusi outcome strategi kamu — standar di semua backtesting hedge fund.</p>
+    <br><p>Kalman filter — dipakai di quant trading untuk smoothing signal — adalah implementasi langsung dari Bayesian inference. Jadi setiap kali kamu memakai filter di algo trading, kamu sedang menjalankan Bayesian statistics.</p>`,
+    subtopics:['Probability axioms & Bayes theorem','Distributions: Normal, Log-normal, Poisson, Student-t','Maximum Likelihood Estimation (MLE)','Hypothesis testing & p-values','Monte Carlo simulation','Markov chains & stochastic processes','Bayesian inference & MCMC sampling'],
+    prereqs:['calculus'],
+    leads_to:['entropy','stochastic'],
+  },
+  {
+    id:'entropy', phase:2, emoji:'🌀', tag:'FISIKA · INFO THEORY',
+    title:'Information Entropy',
+    subtitle:'Thermodinamika & Shannon Theory',
+    formula:'H(X) = -Σ p·log₂(p)',
+    essence:'Mengukur ketidakpastian dalam sistem — fondasi kriptografi, loss function AI, dan analisis pasar.',
+    analogy:'Lempar koin: entropi maksimum (50/50, paling tidak pasti). Lempar dadu yang selalu keluar 6: entropi nol (pasti). Pasar kripto dengan volatility tinggi = entropi tinggi. Dari sinilah loss function di semua neural network berasal — dan kenapa blockchain tidak bisa dimanipulasi.',
+    body_left:`<p>Claude Shannon mengambil konsep "kekacauan" dari fisika termodinamika dan mengaplikasikannya ke teori informasi. Hasilnya mengubah segalanya: dari internet, hingga kriptografi, hingga AI.</p>
+    <br><p>Di neural network, <strong>Cross-Entropy Loss</strong> — loss function paling umum dipakai — secara harfiah adalah Shannon entropy antara distribusi prediksi model dan distribusi target. Setiap kali model "belajar", ia meminimalkan entropi perbedaan ini.</p>
+    <br><p>Ini bukan kebetulan. Ini adalah fisika yang menjadi matematika yang menjadi kode.</p>`,
+    body_right:`<p>Di kriptografi Web3, <strong>hash function seperti SHA-256</strong> bekerja dengan prinsip entropi: input sedikit berbeda menghasilkan output yang sama sekali berbeda dan tidak bisa diprediksi. Ini adalah entropi yang dipakai sebagai keamanan.</p>
+    <br><p><span class="highlight">KL Divergence</span> (Kullback-Leibler) mengukur seberapa jauh satu distribusi probabilitas dari distribusi lain — dipakai di training VAE, reinforcement learning, dan analisis distribusi return aset.</p>
+    <br><p>Di analisis pasar, entropi bisa dipakai untuk mengukur seberapa "efisien" sebuah pasar — semakin tinggi entropy return-nya, semakin susah diprediksi, dan semakin sedikit edge yang tersedia.</p>`,
+    subtopics:['Shannon entropy H(X) — derivasi dan intuisi','Cross-entropy loss function di neural networks','KL Divergence & mutual information','Boltzmann entropy di termodinamika','Channel capacity — Shannon theorem','Minimum Description Length principle','Entropy sebagai market efficiency measure'],
+    prereqs:['probability'],
+    leads_to:['chaos','algo'],
+  },
+  {
+    id:'chaos', phase:2, emoji:'🦋', tag:'FISIKA · NON-LINEAR',
+    title:'Chaos Theory',
+    subtitle:'Non-linear Dynamics',
+    formula:'λ = lim Δx→0 ln|Δx(t)/Δx₀|',
+    essence:'Sensitivitas ekstrem terhadap kondisi awal — menjelaskan cascade liquidation dan black swan event.',
+    analogy:'Kamu melihat seseorang melikuidasi posisi $2 juta di BTC. Harga turun sedikit. Tiba-tiba, ratusan ribu posisi leveraged lain kena stop-loss dan mulai dilikuidasi secara berantai. Dalam 4 menit, harga turun 18%. Ini bukan kebetulan — ini adalah chaos theory yang bekerja secara real-time di depan matamu.',
+    body_left:`<p>Sistem nonlinear memiliki satu sifat yang membuat trader biasa tertipu: <strong>penyebab kecil bisa menghasilkan efek yang tidak proporsional besar.</strong></p>
+    <br><p>Efek kupu-kupu (butterfly effect) bukan metafora. Ini adalah properti matematis yang bisa diukur menggunakan <strong>Lyapunov Exponents</strong> — angka yang mengukur seberapa cepat dua kondisi awal yang hampir identik menjadi berbeda total.</p>
+    <br><p>Sistem dengan Lyapunov exponent positif adalah sistem chaotic. Pasar kripto dengan leverage tinggi memiliki Lyapunov exponent yang sangat positif — sangat sensitif terhadap trigger kecil.</p>`,
+    body_right:`<p>Cascade liquidation adalah bifurcation event — titik di mana sistem tiba-tiba berubah regime dari "stabil" ke "chaos". <span class="highlight">Bifurcation diagram</span> menunjukkan bagaimana sistem bisa tiba-tiba "menjadi kacau" melewati satu threshold kritis.</p>
+    <br><p>Power laws dan self-similarity: crash pasar mengikuti distribusi power law, bukan distribusi normal. Ini artinya crash besar lebih sering terjadi dari yang diperkirakan model Gaussian — dan modelmu perlu memperhitungkan ini.</p>
+    <br><p>Memahami chaos theory membuat kamu <strong>tidak pernah terkejut oleh black swan.</strong> Kamu tahu kapan sistem mendekati titik bifurcation dan bisa menyesuaikan posisi sebelum terlambat.</p>`,
+    subtopics:['Phase space, attractors & limit cycles','Lyapunov exponents — mengukur tingkat chaos','Bifurcation diagrams & period doubling','Fractals, self-similarity & Mandelbrot set','Logistic map sebagai intro chaos','Lorenz attractor — visualisasi chaos 3D','Power laws & scale invariance di finansial'],
+    prereqs:['calculus','entropy'],
+    leads_to:['stochastic','algo'],
+  },
+  {
+    id:'stochastic', phase:3, emoji:'📊', tag:'QUANT FINANCE',
+    title:'Stochastic Calculus & Time Series',
+    subtitle:'Random Walk & Predictive Modeling',
+    formula:'dS = μS dt + σS dW',
+    essence:'Matematika hedge fund untuk options pricing, volatility modeling, dan prediksi aset.',
+    analogy:'Pergerakan harga BTC adalah seperti serbuk sari yang mengambang di air — bergerak acak tapi mengikuti aturan statistik yang bisa dimodelkan. Persamaan di atas adalah cara matematis untuk mendeskripsikan gerakan itu — dan inilah yang dipakai untuk mengharga opsi senilai triliunan dolar setiap hari.',
+    body_left:`<p>Stochastic calculus adalah kalkulus untuk sistem yang berevolusi secara acak. Ini adalah ekstensi alami dari kalkulus biasa — tapi sekarang variabelnya punya komponen random yang tidak bisa diabaikan.</p>
+    <br><p><strong>Ito Lemma</strong> adalah "chain rule" untuk stochastic process. Ini adalah alat yang dipakai Fischer Black dan Myron Scholes untuk menurunkan formula Black-Scholes — model pricing options yang sampai sekarang menjadi standar industri, dan yang memenangkan Nobel Prize 1997.</p>
+    <br><p>Jika kamu ingin memahami kenapa options harganya seperti itu, kenapa implied volatility ada, dan bagaimana cara mengeksploitasinya — stochastic calculus adalah jawabannya.</p>`,
+    body_right:`<p><span class="highlight">GARCH models</span> (Generalized Autoregressive Conditional Heteroskedasticity) — nama yang intimidating untuk konsep yang elegan: volatility pasar berkluster. Period volatility tinggi cenderung diikuti volatility tinggi lagi. GARCH memodelkan ini secara formal.</p>
+    <br><p>Time series analysis (ARIMA, VAR, cointegration) adalah toolkit untuk menemukan pola tersembunyi di data harga historis — tidak untuk prediksi arah (hampir mustahil), tapi untuk <strong>prediksi distribusi return dan mean-reversion opportunities.</strong></p>
+    <br><p>Pairs trading dan statistical arbitrage — strategi yang dipakai quant hedge fund — sepenuhnya bergantung pada konsep cointegration dari time series analysis.</p>`,
+    subtopics:['Brownian motion (Wiener process) — derivasi','Ito calculus & Ito lemma — chain rule stochastic','Stochastic Differential Equations (SDEs)','Black-Scholes model — full derivation','ARIMA & GARCH models untuk volatility','Cointegration & pairs trading strategy','Kalman filter & state space models'],
+    prereqs:['calculus','probability','chaos'],
+    leads_to:['algo'],
+  },
+  {
+    id:'algo', phase:3, emoji:'⚙️', tag:'APPLIED · ENGINEERING',
+    title:'Algorithmic Execution',
+    subtitle:'Multi-disciplinary Integration',
+    formula:'α = Σ(signal × weight) - cost',
+    essence:'Kompilasi semua framework menjadi sistem otomatis yang mengeksploitasi inefisiensi pasar 24/7.',
+    analogy:'Ini adalah titik di mana semuanya berkumpul. Linear algebra memproses order book. Kalkulus menggerakkan gradient descent model prediksimu. Probabilitas memfilter sinyal. Entropi mengukur alpha yang tersisa di pasar. Chaos theory memberi tahu kapan keluar. Stochastic calculus menentukan sizing posisi. Semua itu berjalan dalam satu sistem yang kamu tulis sendiri.',
+    body_left:`<p>Algorithmic trading bukan soal membuat robot yang "selalu profit." Ini soal <strong>membangun sistem yang keunggulannya bisa diukur, direplikasi, dan diskalakan</strong> — hal yang tidak bisa dilakukan trader manusia.</p>
+    <br><p>Market microstructure adalah fondasi: bagaimana cara kerja order book, bid-ask spread, latency, dan market impact? Sebuah strategi yang profitable di teori bisa menjadi rugi setelah memperhitungkan market impact dari eksekusinya sendiri.</p>
+    <br><p><strong>Backtesting yang benar</strong> adalah seni tersendiri: menghindari look-ahead bias, survivorship bias, dan overfitting — kesalahan yang membuat backtest terlihat luar biasa tapi live trading merugi.</p>`,
+    body_right:`<p><span class="highlight">Kelly Criterion</span> — formula dari teori probabilitas — memberitahu berapa persentase modal yang optimal untuk dialokasikan ke setiap trade berdasarkan edge dan win-rate. Ini adalah risk management yang matematis, bukan feeling.</p>
+    <br><p>Di kripto, ada lapisan tambahan: <strong>on-chain data</strong> (whale movements, exchange flows, liquidation heatmaps) dan <strong>MEV (Maximal Extractable Value)</strong> — profit yang bisa diekstrak langsung dari blockchain dengan memahami cara kerja mempool.</p>
+    <br><p>Bahasa: Python (numpy, pandas, scipy) untuk research dan backtesting. C++ untuk production execution di mana latency setiap microsecond penting. Ini adalah pekerjaan engineering yang nyata.</p>`,
+    subtopics:['Market microstructure & order book mechanics','Backtesting: avoiding look-ahead & overfitting bias','Statistical arbitrage & pairs trading implementation','Kelly Criterion & position sizing','VaR, CVaR & drawdown management','On-chain data analysis & MEV strategies','C++ low-latency execution & co-location'],
+    prereqs:['entropy','chaos','stochastic'],
+    leads_to:[],
+  },
+];
+
+/* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+const done = new Set(JSON.parse(localStorage.getItem('qm_done')||'[]'));
+let openCard = null;
+
+function save(){ localStorage.setItem('qm_done', JSON.stringify([...done])) }
+
+/* ════════════════════════════════
+   PROGRESS
+════════════════════════════════ */
+function updateProgress(){
+  const n = done.size, t = TOPICS.length;
+  const pct = Math.round(n/t*100);
+  document.getElementById('npf').style.width = pct+'%';
+  document.getElementById('npl').textContent = n+'/'+t;
+  document.getElementById('footer-prog').textContent = 'Progress: '+n+'/'+t+' topik selesai · tersimpan otomatis';
+}
+
+/* ════════════════════════════════
+   RENDER CARDS
+════════════════════════════════ */
+function phaseClass(p){ return p===1?'p1':p===2?'p2':'p3' }
+
+function renderCards(){
+  [1,2,3].forEach(ph=>{
+    const stack = document.getElementById('stack-'+ph);
+    stack.innerHTML='';
+    TOPICS.filter(t=>t.phase===ph).forEach((t,i)=>{
+      const isDone = done.has(t.id);
+      const isOpen = openCard===t.id;
+      const el = document.createElement('div');
+      el.className='tcard'+(isDone?' done':'')+(isOpen?' open':'');
+      el.id='tc-'+t.id;
+      el.style.transitionDelay=(i*60)+'ms';
+
+      const prereqPills = t.prereqs.length
+        ? t.prereqs.map(pid=>{
+            const pt=TOPICS.find(x=>x.id===pid);
+            return `<button class="cxn-pill" onclick="event.stopPropagation();jumpTo('${pid}')">← ${pt.title}</button>`
+          }).join('')
+        : '<span style="font-size:12px;color:var(--muted)">Mulai dari sini — tidak ada prasyarat</span>';
+
+      const leadsPills = t.leads_to.length
+        ? t.leads_to.map(pid=>{
+            const pt=TOPICS.find(x=>x.id===pid);
+            return `<button class="cxn-pill" onclick="event.stopPropagation();jumpTo('${pid}')">${pt.title} →</button>`
+          }).join('')
+        : '<span style="font-size:12px;color:var(--muted)">Terminal node — ini adalah puncaknya</span>';
+
+      const stHtml = t.subtopics.map(s=>
+        `<div class="stopic"><div class="stopic-dot"></div><span>${s}</span></div>`
+      ).join('');
+
+      el.innerHTML=`
+        <div class="tcard-top" onclick="toggleCard('${t.id}',${ph})">
+          <div class="tcard-icon">${t.emoji}</div>
+          <div class="tcard-meta">
+            <div class="tcard-tag">${t.tag}</div>
+            <div class="tcard-title">${t.title}</div>
+            <div class="tcard-subtitle">${t.subtitle}</div>
+          </div>
+          <div class="tcard-right">
+            <div class="tcard-arrow">▼</div>
+            <div class="tcard-done-chip">✓ selesai</div>
+          </div>
+        </div>
+        <div class="tcard-body">
+          <div class="tcard-inner">
+
+            <div style="grid-column:1/-1">
+              <div class="tcard-section-label">formula kunci</div>
+              <div class="formula-display">${t.formula}</div>
+              <div class="tcard-section-label">analogi dunia nyata</div>
+            </div>
+
+            <div class="analogy-box" style="grid-column:1/-1">
+              <div class="analogy-label">💡 Cara gampang memahaminya</div>
+              <div class="analogy-text">${t.analogy}</div>
+            </div>
+
+            <div>
+              <div class="tcard-section-label">konsep & mekanisme</div>
+              <div class="tcard-body-text">${t.body_left}</div>
+            </div>
+            <div>
+              <div class="tcard-section-label">aplikasi nyata di pasar & AI</div>
+              <div class="tcard-body-text">${t.body_right}</div>
+            </div>
+
+            <div>
+              <div class="tcard-section-label">topik yang harus kamu pelajari</div>
+              <div class="subtopic-grid">${stHtml}</div>
+            </div>
+            <div>
+              <div class="tcard-section-label">hubungan antar topik</div>
+              <div style="margin-bottom:16px">
+                <div style="font-size:11px;color:var(--muted);font-family:var(--font-c);letter-spacing:.1em;margin-bottom:8px">BUTUH DULU →</div>
+                <div class="connections-row">${prereqPills}</div>
+              </div>
+              <div>
+                <div style="font-size:11px;color:var(--muted);font-family:var(--font-c);letter-spacing:.1em;margin-bottom:8px">MEMBUKA AKSES KE →</div>
+                <div class="connections-row">${leadsPills}</div>
+              </div>
+            </div>
+
+            <div class="tcard-actions">
+              <button class="act-btn primary" onclick="searchIt('${t.title}')">↗ Cari resource belajar</button>
+              <button class="act-btn ${isDone?'done-state':''}" id="dbtn-${t.id}" onclick="toggleDone('${t.id}')">
+                ${isDone?'✓ Sudah dipelajari':'○ Tandai selesai'}
+              </button>
+              <button class="act-btn" onclick="copyTopics('${t.id}')">⎘ Salin daftar topik</button>
+            </div>
+
+          </div>
+        </div>`;
+
+      stack.appendChild(el);
+      obs.observe(el);
+    });
+  });
+  updateProgress();
+}
+
+/* ════════════════════════════════
+   INTERACTIONS
+════════════════════════════════ */
+function toggleCard(id, ph){
+  const el = document.getElementById('tc-'+id);
+  if(openCard===id){
+    el.classList.remove('open');
+    openCard=null;
+    return;
+  }
+  if(openCard){
+    const prev = document.getElementById('tc-'+openCard);
+    if(prev) prev.classList.remove('open');
+  }
+  openCard=id;
+  el.classList.add('open');
+  setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+window.toggleCard=toggleCard;
+
+function jumpTo(id){
+  const t=TOPICS.find(x=>x.id===id);
+  if(openCard){ document.getElementById('tc-'+openCard)?.classList.remove('open'); }
+  openCard=null;
+  setTimeout(()=>{
+    toggleCard(id, t.phase);
+    document.getElementById('tc-'+id)?.scrollIntoView({behavior:'smooth',block:'start'});
+  },50);
+}
+window.jumpTo=jumpTo;
+
+function toggleDone(id){
+  done.has(id)?done.delete(id):done.add(id);
+  save();
+  const card=document.getElementById('tc-'+id);
+  const btn=document.getElementById('dbtn-'+id);
+  const chip=card?.querySelector('.tcard-done-chip');
+  if(done.has(id)){
+    card?.classList.add('done');
+    if(btn){btn.className='act-btn done-state';btn.textContent='✓ Sudah dipelajari'}
+    if(chip) chip.style.transform='scale(1)';
+  } else {
+    card?.classList.remove('done');
+    if(btn){btn.className='act-btn';btn.textContent='○ Tandai selesai'}
+    if(chip) chip.style.transform='scale(0)';
+  }
+  updateProgress();
+}
+window.toggleDone=toggleDone;
+
+function searchIt(title){
+  window.open('https://www.google.com/search?q='+encodeURIComponent(title+' lecture quant finance MIT OCW 3Blue1Brown'),'_blank');
+}
+window.searchIt=searchIt;
+
+function copyTopics(id){
+  const t=TOPICS.find(x=>x.id===id);
+  const txt=t.title+' — Daftar topik:\n'+t.subtopics.map((s,i)=>(i+1)+'. '+s).join('\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.querySelector(`[onclick="copyTopics('${id}')"]`);
+    if(btn){const o=btn.textContent;btn.textContent='✓ Tersalin!';setTimeout(()=>btn.textContent=o,1500)}
+  });
+}
+window.copyTopics=copyTopics;
+
+/* ════════════════════════════════
+   INTERSECTION OBSERVER
+════════════════════════════════ */
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('vis');
+  });
+},{threshold:0.08,rootMargin:'0px 0px -30px 0px'});
+
+document.querySelectorAll('[data-obs]').forEach(el=>obs.observe(el));
+
+/* ════════════════════════════════
+   STARFIELD CANVAS
+════════════════════════════════ */
+(function(){
+  const cv=document.getElementById('starfield');
+  const cx=cv.getContext('2d');
+  let W,H,stars=[];
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  function init(){
+    stars=[];
+    const n=Math.floor(W*H/4000);
+    for(let i=0;i<n;i++){
+      stars.push({
+        x:Math.random()*W,y:Math.random()*H,
+        r:Math.random()*1.2+.2,
+        a:Math.random(),da:.002+Math.random()*.003,
+        phase:Math.random()*Math.PI*2
+      });
+    }
+  }
+  let t=0;
+  function draw(){
+    cx.clearRect(0,0,W,H);
+    t+=.008;
+    stars.forEach(s=>{
+      const alpha=(Math.sin(t+s.phase)*.3+.4)*s.a;
+      cx.fillStyle=`rgba(255,255,255,${alpha})`;
+      cx.beginPath();cx.arc(s.x,s.y,s.r,0,Math.PI*2);cx.fill();
+    });
+    // subtle grid lines
+    cx.strokeStyle='rgba(245,200,66,0.025)';
+    cx.lineWidth=1;
+    const gs=160;
+    for(let x=0;x<W;x+=gs){
+      cx.beginPath();cx.moveTo(x,0);cx.lineTo(x,H);cx.stroke();
+    }
+    for(let y=0;y<H;y+=gs){
+      cx.beginPath();cx.moveTo(0,y);cx.lineTo(W,y);cx.stroke();
+    }
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize',()=>{resize();init()});
+  resize();init();draw();
+})();
+
+/* ═══ INIT ═══ */
+renderCards();
+document.querySelectorAll('[data-obs]').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
